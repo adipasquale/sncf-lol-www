@@ -1,0 +1,220 @@
+<html>
+
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+<link rel="stylesheet" href="jquery-ui.min.css">
+<link rel="stylesheet" href="jquery-ui.theme.min.css">
+
+<style>
+.main-wrapper{
+  padding-top: 20px;
+}
+.leftbar{
+  background-color: #ccc;
+  min-height: 100%;
+}
+.result-row{
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  font-size: 16px;
+}
+.time{
+  font-weight: bold;
+}
+.station-name{
+  text-transform: capitalize;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="row">
+    <div class="col-md-4 leftbar main-wrapper">
+      <form class="form-horizontal" id="search-form">
+        <div class="form-group">
+          <label for="departure_city" class="col-sm-4 control-label">Départ</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="departure_city" value="Paris">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="arrival_city" class="col-sm-4 control-label">Arrivée</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="arrival_city" value="Avignon">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="departure_date" class="col-sm-4 control-label">Jour</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="departure_date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="departure_hour" class="col-sm-4 control-label">À partir de</label>
+          <div class="col-sm-8">
+            <select class="form-control" id="departure_hour">
+              <option value="0">00h</option>
+              <option value="1">01h</option>
+              <option value="2">02h</option>
+              <option value="3">03h</option>
+              <option value="4">04h</option>
+              <option value="5">05h</option>
+              <option value="6">06h</option>
+              <option value="7">07h</option>
+              <option value="8">08h</option>
+              <option value="9">09h</option>
+              <option value="10">10h</option>
+              <option value="11">11h</option>
+              <option value="12">12h</option>
+              <option value="13">13h</option>
+              <option value="14">14h</option>
+              <option value="15">15h</option>
+              <option value="16">16h</option>
+              <option value="17">17h</option>
+              <option value="18" selected="true">18h</option>
+              <option value="19">19h</option>
+              <option value="20">20h</option>
+              <option value="21">21h</option>
+              <option value="22">22h</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+            <button type="submit" class="btn btn-default">Trouver</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-md-8 main-wrapper">
+      <div id="results">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+<script src="jquery-ui.min.js"></script>
+
+<script>
+  $(document).ready(function(){
+
+    $("#departure_date").datepicker({
+      minDate: 0,
+      dateFormat: "dd/mm/yy"
+    });
+
+    // populate default values
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    $("#departure_date").val($.datepicker.formatDate('dd/mm/yy', tomorrow));
+
+    var rowTemplate = _.template($("#results-row-template").html());
+
+    var currentItems = [];
+
+    var insertItems = function(items){
+      _.each(items, function(i){ i["departure_datetime"] = new Date(i["departure_datetime"]) });
+      currentItems = currentItems.concat(items);
+      currentItems = _.sortBy(currentItems, function(i) { i["departure_datetime"] });
+      $("#results").html(
+        _.map(currentItems, function(item){
+          return rowTemplate({item: item})
+        }).join("")
+      );
+    };
+
+    var apiUrl = "http://sncflol.herokuapp.com/crawl.json";
+    if (window.location.hostname == "" || window.location.hostname == "localhost") {
+      apiUrl = "http://localhost:9080/crawl.json";
+    }
+
+    $("#search-form").submit(function(){
+      $submitButton = $("#search-form *[type=submit]");
+      $submitButton.attr("disabled", "disabled");
+      $("#results").html("Crawling voyages-sncf ...");
+      $.ajax({
+        url: apiUrl,
+        method: "POST",
+        dataType: "json",
+        data: JSON.stringify({
+          "request": {
+            "url": "http://voyages-sncf.mobi",
+            "meta": {
+              "departure_city": $("#departure_city").val(),
+              "arrival_city": $("#arrival_city").val(),
+              "departure_date": $("#departure_date").val(),
+              "departure_hour": $("#departure_hour").val()
+            }
+          },
+          "spider_name": "voyagessncf"
+        }),
+        success: function(data){
+          if (data.items.length > 0) {
+            currentItems = [];
+            insertItems(data.items);
+          } else {
+            $("#results").html("no results :(")
+          }
+        },
+        error: function(err){
+          $("#results").html("erreur :(");
+          console.log(err);
+        },
+        complete: function(){
+          $submitButton.removeAttr("disabled");
+        }
+      });
+      return false;
+    })
+  })
+</script>
+
+<script type="text/template" id="results-row-template">
+  <div class="row result-row">
+    <div class="col-md-2">
+      <div class='price'>
+        <%= item.price.toFixed(2).replace(".", ",") %>€
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class='time'>
+        <%= item.departure_time_readable %>
+      </div>
+      <div class='station-name'>
+        <%= item.departure_station.toLowerCase() %>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class='time'>
+        <%= item.arrival_time_readable %>
+      </div>
+      <div class='station-name'>
+        <%= item.arrival_station.toLowerCase() %>
+      </div>
+    </div>
+    <div class="col-md-3">
+      (<%= item.duration_readable %>)
+      <% if (item.changes > 0) { %>
+        <div class="changes">
+          <%= item.changes %> changements
+        </div>
+      <% } %>
+    </div>
+  </div>
+</script>
+
+</body>
+</html>
