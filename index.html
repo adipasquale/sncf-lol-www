@@ -19,12 +19,23 @@
   padding: 10px 0;
   border-bottom: 1px solid #ccc;
   font-size: 16px;
+  cursor: pointer;
+}
+.result-row:hover{
+  background-color: rgb(245, 245, 245);
 }
 .time{
-  font-weight: bold;
+
 }
 .station-name{
   text-transform: capitalize;
+}
+.time-details{
+  color: #999;
+  font-size: 14px;
+}
+.collapsed .collapsable{
+  display: none;
 }
 </style>
 
@@ -99,13 +110,42 @@
               <option value="13">13h</option>
               <option value="14">14h</option>
               <option value="15">15h</option>
-              <option value="16">16h</option>
+              <option value="16" selected="true">16h</option>
               <option value="17">17h</option>
-              <option value="18" selected="true">18h</option>
+              <option value="18">18h</option>
               <option value="19">19h</option>
               <option value="20">20h</option>
               <option value="21">21h</option>
               <option value="22">22h</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="commercial_card" class="col-sm-4 control-label">Carte de réduction</label>
+          <div class="col-sm-8">
+            <select class="form-control" id="commercial_card">
+              <option value="">Sans carte</option>
+              <option value="JEUNE" selected="selected">Carte Jeune</option>
+              <option value="WEEK_END">Carte Week-end</option>
+              <option value="ACCOMPAGNANT_WEEK_END">Accompagnant Week-end</option>
+              <option value="SENIOR_PLUS">Carte Senior +</option>
+              <option value="FORFAIT_BAMBIN">Forfait bambin (siège réservé)</option>
+              <option value="ENFANT_PLUS">Carte Enfant +</option>
+              <option value="ACCOMPAGNANT_ENFANT_PLUS">Accompagnant Enfant +</option>
+              <option value="ENFANT_FAMILLE">Carte Enfant Famille</option>
+              <option value="FAMILLE_NOMBREUSE_30PC">Famille Nombreuse 30 %</option>
+              <option value="FAMILLE_NOMBREUSE_40PC">Famille Nombreuse 40 %</option>
+              <option value="FAMILLE_NOMBREUSE_50PC">Famille Nombreuse 50 %</option>
+              <option value="FAMILLE_NOMBREUSE_75PC">Famille Nombreuse 75 %</option>
+              <option value="MILITAIRE_1ERE">Carte Militaire 1ère</option>
+              <option value="MILITAIRE_2NDE">Carte Militaire 2nde</option>
+              <option value="FAMILLE_MILITAIRE">Carte Famille Militaire</option>
+              <option value="FREQUENCE_1">Abonnement Fréquence 1ère</option>
+              <option value="FREQUENCE_2">Abonnement Fréquence 2nde</option>
+              <option value="ABONNEMENT_FORFAIT_1ERE">Abonnement Forfait 1ère</option>
+              <option value="ABONNEMENT_FORFAIT_2NDE">Abonnement Forfait 2nde</option>
+              <option value="FREQUENCE_INTERMEDIAIRE_1">Abo Fréquence 25 1ère</option>
+              <option value="FREQUENCE_INTERMEDIAIRE_2">Abo Fréquence 25 2nde</option></select>
             </select>
           </div>
         </div>
@@ -131,6 +171,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 <script src="jquery-ui.min.js"></script>
+<script src="datepicker-fr.js"></script>
 
 <script>
   Date.prototype.getWeekNumber = function(){
@@ -180,6 +221,13 @@
           return rowTemplate({week: week, best_pair: week["best_pair"]})
         }).join("")
       );
+      bindRowEvents();
+    };
+
+    var bindRowEvents = function(){
+      $(".result-row").click(function(e){
+        $(e.currentTarget).toggleClass("collapsed");
+      });
     };
 
     var apiUrl = "http://sncf-lol-api.herokuapp.com/crawl.json";
@@ -187,7 +235,7 @@
       apiUrl = "http://localhost:9080/crawl.json";
     }
 
-    var callApi = function(date, start_hour, direction, weekOffset){
+    var callApi = function(departureCity, arrivalCity, date, departureHour, direction, weekOffset){
       $.ajax({
         url: apiUrl,
         method: "POST",
@@ -196,10 +244,11 @@
           "request": {
             "url": "http://voyages-sncf.mobi",
             "meta": {
-              "departure_city": $("#departure_city").val(),
-              "arrival_city": $("#arrival_city").val(),
+              "departure_city": departureCity,
+              "arrival_city": arrivalCity,
               "departure_date": $.datepicker.formatDate('dd/mm/yy', date),
-              "departure_hour": start_hour
+              "departure_hour": departureHour,
+              "commercial_card": $("#commercial_card").val()
             }
           },
           "spider_name": "voyagessncf"
@@ -243,13 +292,15 @@
       $("#results").html("Crawling voyages-sncf ...");
       currentItems = [];
 
+      var departureCity = $("#departure_city").val();
+      var arrivalCity = $("#arrival_city").val();
       var nextFriday = getNextDay(new Date(), 5);
-      for(var i = 0; i < 3; i++) {
+      for(var i = 0; i < 4; i++) {
         friday = new Date(nextFriday.getTime());
         friday.setDate(friday.getDate() + i * 7);
         var sunday = getNextDay(friday, 0);
-        callApi(friday, $("inwards_departure_hour").val(), "inwards", i + 1);
-        callApi(sunday, $("backwards_departure_hour").val(), "backwards", i + 1);
+        callApi(departureCity, arrivalCity, friday, $("inwards_departure_hour").val(), "inwards", i + 1);
+        callApi(arrivalCity, departureCity, sunday, $("backwards_departure_hour").val(), "backwards", i + 1);
       }
 
       return false;
@@ -258,7 +309,7 @@
 </script>
 
 <script type="text/template" id="results-row-template">
-  <div class="row result-row">
+  <div class="row result-row collapsed">
     <div class="col-md-3">
       <div class="week-number">
         <% if (week.weekOffset == 1) { %>
@@ -272,72 +323,46 @@
       </div>
     </div>
 
-    <div class="col-md-4">
-      Vendredi <%= $.datepicker.formatDate('dd/mm', best_pair.inwards.departure_datetime) %>
+    <% _.each([best_pair.inwards, best_pair.backwards], function(journey) { %>
+      <div class="col-md-4">
+        <%= $.datepicker.formatDate('DD dd MM', journey.departure_datetime) %>
 
-      <div>
-        <span class='time'>
-          <%= best_pair.inwards.departure_time_readable %>
-        </span>
-        <span class='station-name'>
-          <%= best_pair.inwards.departure_station.toLowerCase() %>
-        </span>
-      </div>
-
-      <div>
-        <span class='time'>
-          <%= best_pair.inwards.arrival_time_readable %>
-        </span>
-        <span class='station-name'>
-          <%= best_pair.inwards.arrival_station.toLowerCase() %>
-        </span>
-      </div>
-
-      <div>
-        (<%= best_pair.inwards.duration_readable %>)
-        <% if (best_pair.inwards.changes > 0) { %>
-          <span class="changes">
-            <%= best_pair.inwards.changes %> chgmts
+        <div>
+          <span class='time'>
+            <%= journey.departure_time_readable %>
           </span>
-        <% } %>
-      </div>
-
-      <div><i><%= best_pair.inwards.price %>€</i></div>
-    </div>
-
-    <div class="col-md-4">
-      Dimanche <%= $.datepicker.formatDate('dd/mm', best_pair.backwards.departure_datetime) %>
-
-      <div>
-        <span class='time'>
-          <%= best_pair.backwards.departure_time_readable %>
-        </span>
-        <span class='station-name'>
-          <%= best_pair.backwards.departure_station.toLowerCase() %>
-        </span>
-      </div>
-
-      <div>
-        <span class='time'>
-          <%= best_pair.backwards.arrival_time_readable %>
-        </span>
-        <span class='station-name'>
-          <%= best_pair.backwards.arrival_station.toLowerCase() %>
-        </span>
-      </div>
-
-      <div>
-        (<%= best_pair.backwards.duration_readable %>)
-        <% if (best_pair.backwards.changes > 0) { %>
-          <span class="changes">
-            <%= best_pair.backwards.changes %> chgmts
+          ➔
+          <span class='time'>
+            <%= journey.arrival_time_readable %>
           </span>
-        <% } %>
+        </div>
+
+        <div class="time-details">
+          <%= journey.duration_readable %>
+          <% if (journey.changes > 0) { %>
+            -
+            <span class="changes">
+              <%= journey.changes %> chgmts
+            </span>
+          <% } %>
+        </div>
+
+        <div class="collapsable">
+          <span class='station-name'>
+            <%= journey.arrival_station.toLowerCase() %>
+          </span>
+          ➔
+          <span class='station-name'>
+            <%= journey.departure_station.toLowerCase() %>
+          </span>
+
+          <div><%= journey.category %></div>
+          <div><i><%= journey.price.toFixed(2).replace(".", ",") %>€</i></div>
+        </div>
+
       </div>
+    <% }) %>
 
-      <div><i><%= best_pair.backwards.price %>€</i></div>
-
-    </div>
   </div>
 </script>
 
