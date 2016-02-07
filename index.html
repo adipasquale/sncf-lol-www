@@ -6,14 +6,13 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 <link rel="stylesheet" href="jquery-ui.min.css">
 <link rel="stylesheet" href="jquery-ui.theme.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Patrick+Hand' rel='stylesheet' type='text/css'>
 
 <style>
-.main-wrapper{
-  padding-top: 20px;
-}
 .leftbar{
-  background-color: #ccc;
-  min-height: 100%;
+  /*background-color: #ccc;*/
 }
 .result-row{
   padding: 10px 0;
@@ -32,10 +31,128 @@
 }
 .time-details{
   color: #999;
-  font-size: 14px;
+}
+.time-details, .journey-details{
+  font-size: 13px;
 }
 .collapsed .collapsable{
   display: none;
+}
+.menu{
+  margin-left: 0;
+}
+nav{
+  /*background-color: rgb(241,240,191);*/
+  font-family: 'Pacifico', cursive;
+  padding: 0;
+}
+nav .container{
+  padding: 0;
+
+}
+nav ul{
+  margin: 0;
+  padding: 0;
+}
+nav ul li{
+  height: 50px;
+  padding: 15px 0;
+  line-height: 20px;
+  margin: 0;
+}
+nav a{
+  padding: 0 10px;
+  color: inherit;
+  font-size: 30px;
+}
+nav a:hover{
+  text-decoration: none;
+}
+nav .logo{
+  background-color: rgb(251,187,198);
+}
+nav .ou{
+  background-color: rgb(158,231,214);
+}
+nav .quand{
+  background-color: rgb(197,166,223);
+}
+nav .active, nav .menu li:hover{
+  border-bottom: 2px solid #555;
+}
+nav .logo span:nth-child(1){
+  color: rgb(197,166,223);
+}
+nav .logo span:nth-child(2){
+  color: rgb(158,231,214);
+}
+nav .logo span:nth-child(3){
+  color: rgb(197,166,223);
+}
+nav .logo span:nth-child(4){
+  color: rgb(125,213,237);
+}
+nav .logo span:nth-child(5){
+  color: rgb(158,231,214);
+}
+nav .logo span:nth-child(6){
+  color: rgb(158,231,214);
+}
+nav .logo span:nth-child(7){
+  color: rgb(241,240,191);
+}
+nav .logo span:nth-child(8){
+  color: rgb(125,213,237);
+}
+.col-submit{
+  text-align: right;
+  margin-top: 5px;
+}
+.more-filters{
+  display: none;
+}
+form .arrow{
+  text-align: center;
+  font-size: 25px;
+}
+input[type=text]{
+  border-radius: 0;
+  border: 0;
+}
+.submit-col{
+  z-index: 10;
+}
+input[type=submit]{
+  height: 34px;
+  padding: 12px;
+  border: 0;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+.form-wrapper{
+  background-color: rgb(197,166,223);
+  padding-bottom: 15px;
+}
+form{
+  margin: 0;
+}
+.results-wrapper{
+  border-left: 1px solid #ccc;
+}
+.form-wrapper{
+  padding-top: 20px;
+}
+.col-week{
+  padding-top: 20px;
+  text-align: right;
+}
+.col-price{
+  padding-top: 10px;
+  text-align: center;
+  font-family: 'Patrick Hand', cursive;
+  color: rgb(178, 150, 202);
+  font-size: 26px;
 }
 </style>
 
@@ -43,122 +160,146 @@
 
 <body>
 
-<div class="container">
+<nav>
+  <div class="container">
+    <ul class="list-inline pull-right">
+      <li class="logo">
+        <a href="#">
+          <span>s</span><span>n</span><span>c</span><span>f</span><span>.</span><span>l</span><span>o</span><span>l</span>
+        </a>
+      </li>
+    </ul>
+    <ul class="list-inline menu">
+      <li class="ou">
+        <a href="#">Où ?</a>
+      </li><li class="quand active">
+        <a href="index.html">Quand ?</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container main-container">
 
   <div class="row">
-    <div class="col-md-4 leftbar main-wrapper">
+    <div class="col-md-4 form-wrapper">
+
       <form class="form-horizontal" id="search-form">
-        <div class="form-group">
-          <label for="departure_city" class="col-sm-4 control-label">Départ</label>
-          <div class="col-sm-8">
+        <div class="row">
+          <div class="col-xs-5">
             <input type="text" class="form-control" id="departure_city" value="Paris">
           </div>
-        </div>
-        <div class="form-group">
-          <label for="arrival_city" class="col-sm-4 control-label">Arrivée</label>
-          <div class="col-sm-8">
+          <div class="col-xs-1 arrow">➔</div>
+          <div class="col-xs-5">
             <input type="text" class="form-control" id="arrival_city" value="Avignon">
           </div>
+          <div class="col-xs-1 col-submit">
+            <input type="submit" class="submit-button" value="✓">
+          </div>
+
         </div>
-        <div class="form-group">
-          <label for="inwards_departure_hour" class="col-sm-4 control-label">Partir après</label>
-          <div class="col-sm-8">
-            <select class="form-control" id="inwards_departure_hour">
-              <option value="0">00h</option>
-              <option value="1">01h</option>
-              <option value="2">02h</option>
-              <option value="3">03h</option>
-              <option value="4">04h</option>
-              <option value="5">05h</option>
-              <option value="6">06h</option>
-              <option value="7">07h</option>
-              <option value="8">08h</option>
-              <option value="9">09h</option>
-              <option value="10">10h</option>
-              <option value="11">11h</option>
-              <option value="12">12h</option>
-              <option value="13">13h</option>
-              <option value="14">14h</option>
-              <option value="15">15h</option>
-              <option value="16">16h</option>
-              <option value="17">17h</option>
-              <option value="18" selected="true">18h</option>
-              <option value="19">19h</option>
-              <option value="20">20h</option>
-              <option value="21">21h</option>
-              <option value="22">22h</option>
-            </select>
+
+
+        <div class="more-filters">
+          <div class="form-group">
+            <label for="inwards_departure_hour" class="col-sm-4 control-label">Partir après</label>
+            <div class="col-sm-8">
+              <select class="form-control" id="inwards_departure_hour">
+                <option value="0">00h</option>
+                <option value="1">01h</option>
+                <option value="2">02h</option>
+                <option value="3">03h</option>
+                <option value="4">04h</option>
+                <option value="5">05h</option>
+                <option value="6">06h</option>
+                <option value="7">07h</option>
+                <option value="8">08h</option>
+                <option value="9">09h</option>
+                <option value="10">10h</option>
+                <option value="11">11h</option>
+                <option value="12">12h</option>
+                <option value="13">13h</option>
+                <option value="14">14h</option>
+                <option value="15">15h</option>
+                <option value="16">16h</option>
+                <option value="17">17h</option>
+                <option value="18" selected="true">18h</option>
+                <option value="19">19h</option>
+                <option value="20">20h</option>
+                <option value="21">21h</option>
+                <option value="22">22h</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="backwards_departure_hour" class="col-sm-4 control-label">Revenir après</label>
+            <div class="col-sm-8">
+              <select class="form-control" id="backwards_departure_hour">
+                <option value="0">00h</option>
+                <option value="1">01h</option>
+                <option value="2">02h</option>
+                <option value="3">03h</option>
+                <option value="4">04h</option>
+                <option value="5">05h</option>
+                <option value="6">06h</option>
+                <option value="7">07h</option>
+                <option value="8">08h</option>
+                <option value="9">09h</option>
+                <option value="10">10h</option>
+                <option value="11">11h</option>
+                <option value="12">12h</option>
+                <option value="13">13h</option>
+                <option value="14">14h</option>
+                <option value="15">15h</option>
+                <option value="16" selected="true">16h</option>
+                <option value="17">17h</option>
+                <option value="18">18h</option>
+                <option value="19">19h</option>
+                <option value="20">20h</option>
+                <option value="21">21h</option>
+                <option value="22">22h</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="commercial_card" class="col-sm-4 control-label">Carte de réduction</label>
+            <div class="col-sm-8">
+              <select class="form-control" id="commercial_card">
+                <option value="">Sans carte</option>
+                <option value="JEUNE" selected="selected">Carte Jeune</option>
+                <option value="WEEK_END">Carte Week-end</option>
+                <option value="ACCOMPAGNANT_WEEK_END">Accompagnant Week-end</option>
+                <option value="SENIOR_PLUS">Carte Senior +</option>
+                <option value="FORFAIT_BAMBIN">Forfait bambin (siège réservé)</option>
+                <option value="ENFANT_PLUS">Carte Enfant +</option>
+                <option value="ACCOMPAGNANT_ENFANT_PLUS">Accompagnant Enfant +</option>
+                <option value="ENFANT_FAMILLE">Carte Enfant Famille</option>
+                <option value="FAMILLE_NOMBREUSE_30PC">Famille Nombreuse 30 %</option>
+                <option value="FAMILLE_NOMBREUSE_40PC">Famille Nombreuse 40 %</option>
+                <option value="FAMILLE_NOMBREUSE_50PC">Famille Nombreuse 50 %</option>
+                <option value="FAMILLE_NOMBREUSE_75PC">Famille Nombreuse 75 %</option>
+                <option value="MILITAIRE_1ERE">Carte Militaire 1ère</option>
+                <option value="MILITAIRE_2NDE">Carte Militaire 2nde</option>
+                <option value="FAMILLE_MILITAIRE">Carte Famille Militaire</option>
+                <option value="FREQUENCE_1">Abonnement Fréquence 1ère</option>
+                <option value="FREQUENCE_2">Abonnement Fréquence 2nde</option>
+                <option value="ABONNEMENT_FORFAIT_1ERE">Abonnement Forfait 1ère</option>
+                <option value="ABONNEMENT_FORFAIT_2NDE">Abonnement Forfait 2nde</option>
+                <option value="FREQUENCE_INTERMEDIAIRE_1">Abo Fréquence 25 1ère</option>
+                <option value="FREQUENCE_INTERMEDIAIRE_2">Abo Fréquence 25 2nde</option></select>
+              </select>
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="backwards_departure_hour" class="col-sm-4 control-label">Revenir après</label>
-          <div class="col-sm-8">
-            <select class="form-control" id="backwards_departure_hour">
-              <option value="0">00h</option>
-              <option value="1">01h</option>
-              <option value="2">02h</option>
-              <option value="3">03h</option>
-              <option value="4">04h</option>
-              <option value="5">05h</option>
-              <option value="6">06h</option>
-              <option value="7">07h</option>
-              <option value="8">08h</option>
-              <option value="9">09h</option>
-              <option value="10">10h</option>
-              <option value="11">11h</option>
-              <option value="12">12h</option>
-              <option value="13">13h</option>
-              <option value="14">14h</option>
-              <option value="15">15h</option>
-              <option value="16" selected="true">16h</option>
-              <option value="17">17h</option>
-              <option value="18">18h</option>
-              <option value="19">19h</option>
-              <option value="20">20h</option>
-              <option value="21">21h</option>
-              <option value="22">22h</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="commercial_card" class="col-sm-4 control-label">Carte de réduction</label>
-          <div class="col-sm-8">
-            <select class="form-control" id="commercial_card">
-              <option value="">Sans carte</option>
-              <option value="JEUNE" selected="selected">Carte Jeune</option>
-              <option value="WEEK_END">Carte Week-end</option>
-              <option value="ACCOMPAGNANT_WEEK_END">Accompagnant Week-end</option>
-              <option value="SENIOR_PLUS">Carte Senior +</option>
-              <option value="FORFAIT_BAMBIN">Forfait bambin (siège réservé)</option>
-              <option value="ENFANT_PLUS">Carte Enfant +</option>
-              <option value="ACCOMPAGNANT_ENFANT_PLUS">Accompagnant Enfant +</option>
-              <option value="ENFANT_FAMILLE">Carte Enfant Famille</option>
-              <option value="FAMILLE_NOMBREUSE_30PC">Famille Nombreuse 30 %</option>
-              <option value="FAMILLE_NOMBREUSE_40PC">Famille Nombreuse 40 %</option>
-              <option value="FAMILLE_NOMBREUSE_50PC">Famille Nombreuse 50 %</option>
-              <option value="FAMILLE_NOMBREUSE_75PC">Famille Nombreuse 75 %</option>
-              <option value="MILITAIRE_1ERE">Carte Militaire 1ère</option>
-              <option value="MILITAIRE_2NDE">Carte Militaire 2nde</option>
-              <option value="FAMILLE_MILITAIRE">Carte Famille Militaire</option>
-              <option value="FREQUENCE_1">Abonnement Fréquence 1ère</option>
-              <option value="FREQUENCE_2">Abonnement Fréquence 2nde</option>
-              <option value="ABONNEMENT_FORFAIT_1ERE">Abonnement Forfait 1ère</option>
-              <option value="ABONNEMENT_FORFAIT_2NDE">Abonnement Forfait 2nde</option>
-              <option value="FREQUENCE_INTERMEDIAIRE_1">Abo Fréquence 25 1ère</option>
-              <option value="FREQUENCE_INTERMEDIAIRE_2">Abo Fréquence 25 2nde</option></select>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="col-sm-offset-4 col-sm-8">
-            <button type="submit" class="btn btn-default">Trouver</button>
-          </div>
-        </div>
+
       </form>
     </div>
 
-    <div class="col-md-8 main-wrapper">
+    <div class="col-md-8 results-wrapper">
       <div id="results">
+
       </div>
     </div>
   </div>
@@ -208,14 +349,14 @@
       _.each(currData, function(week){
         if (week["inwards"].length > 0 && week["backwards"].length > 0) {
           week["best_pair"] = {
-            "inwards": week["inwards"].shift(),
-            "backwards": week["backwards"].shift(),
+            "inwards": week["inwards"][0],
+            "backwards": week["backwards"][0],
           };
           week["best_pair"]["price"] = week["best_pair"]["inwards"]["price"] + week["best_pair"]["backwards"]["price"]
           weeks.push(week);
         }
       });
-      weeks = _.sortBy(weeks, function(w){ return w["best_pair"]["price"] });
+      weeks = _.sortBy(weeks, function(w){ return w["best_pair"]["number"] });
       $("#results").html(
         _.map(weeks, function(week){
           return rowTemplate({week: week, best_pair: week["best_pair"]})
@@ -231,7 +372,7 @@
     };
 
     var apiUrl = "http://api.sncf.lol/crawl.json";
-    if (window.location.hostname == "" || window.location.hostname == "localhost") {
+    if (["localhost", "", "127.0.0.1"].indexOf(window.location.hostname) >= 0) {
       apiUrl = "http://localhost:9080/crawl.json";
     }
 
@@ -290,17 +431,17 @@
       $submitButton = $("#search-form *[type=submit]");
       $submitButton.attr("disabled", "disabled");
       $("#results").html("Crawling voyages-sncf ...");
-      currentItems = [];
+      currData = {};
 
       var departureCity = $("#departure_city").val();
       var arrivalCity = $("#arrival_city").val();
       var nextFriday = getNextDay(new Date(), 5);
-      for(var i = 0; i < 4; i++) {
+      for(var i = 0; i < 10; i++) {
         friday = new Date(nextFriday.getTime());
         friday.setDate(friday.getDate() + i * 7);
         var sunday = getNextDay(friday, 0);
-        callApi(departureCity, arrivalCity, friday, $("inwards_departure_hour").val(), "inwards", i + 1);
-        callApi(arrivalCity, departureCity, sunday, $("backwards_departure_hour").val(), "backwards", i + 1);
+        callApi(departureCity, arrivalCity, friday, $("#inwards_departure_hour").val(), "inwards", i + 1);
+        callApi(arrivalCity, departureCity, sunday, $("#backwards_departure_hour").val(), "backwards", i + 1);
       }
 
       return false;
@@ -308,9 +449,11 @@
   })
 </script>
 
+<script src="http://localhost:35729/livereload.js"></script>
+
 <script type="text/template" id="results-row-template">
   <div class="row result-row collapsed">
-    <div class="col-md-3">
+    <div class="col-xs-3 col-week">
       <div class="week-number">
         <% if (week.weekOffset == 1) { %>
           La semaine prochaine
@@ -318,13 +461,16 @@
           Dans <%= week.weekOffset %> semaines
         <% } %>
       </div>
+    </div>
+
+    <div class="col-xs-3 col-price">
       <div class='price'>
         <%= best_pair.price.toFixed(2).replace(".", ",") %>€
       </div>
     </div>
 
     <% _.each([best_pair.inwards, best_pair.backwards], function(journey) { %>
-      <div class="col-md-4">
+      <div class="col-xs-3">
         <%= $.datepicker.formatDate('DD dd MM', journey.departure_datetime) %>
 
         <div>
@@ -347,13 +493,13 @@
           <% } %>
         </div>
 
-        <div class="collapsable">
+        <div class="collapsable journey-details">
           <span class='station-name'>
-            <%= journey.arrival_station.toLowerCase() %>
+            <%= journey.departure_station.toLowerCase() %>
           </span>
           ➔
           <span class='station-name'>
-            <%= journey.departure_station.toLowerCase() %>
+            <%= journey.arrival_station.toLowerCase() %>
           </span>
 
           <div><%= journey.category %></div>
