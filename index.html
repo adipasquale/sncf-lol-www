@@ -16,7 +16,6 @@
 }
 .result-row{
   padding: 10px 0;
-  border-bottom: 1px solid #ccc;
   font-size: 16px;
   cursor: pointer;
 }
@@ -106,7 +105,8 @@ nav .logo span:nth-child(8){
 }
 .col-submit{
   text-align: right;
-  margin-top: 5px;
+  padding: 0;
+  line-height: 10px;
 }
 .more-filters{
   display: none;
@@ -116,11 +116,7 @@ form .arrow{
   font-size: 25px;
 }
 input[type=text]{
-  border-radius: 0;
   border: 0;
-}
-.submit-col{
-  z-index: 10;
 }
 input[type=submit]{
   height: 34px;
@@ -133,12 +129,13 @@ input[type=submit]{
 .form-wrapper{
   background-color: rgb(197,166,223);
   padding-bottom: 15px;
+  z-index: 10;
 }
 form{
   margin: 0;
 }
 .results-wrapper{
-  border-left: 1px solid #ccc;
+  padding-bottom: 50px;
 }
 .form-wrapper{
   padding-top: 20px;
@@ -153,6 +150,93 @@ form{
   font-family: 'Patrick Hand', cursive;
   color: rgb(178, 150, 202);
   font-size: 26px;
+}
+.more-row{
+  padding: 10px 0;
+  text-align: center;
+  color: rgb(178, 150, 202);
+}
+.more-row:hover{
+  background-color: rgb(178, 150, 202);
+  color: #fff;
+}
+
+
+/* Sticky footer from http://getbootstrap.com/examples/sticky-footer/sticky-footer.css */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background-color: rgb(197,166,223);
+  font-size: 22px;
+  line-height: 54px;
+  font-family: 'Pacifico', cursive;
+}
+.footer img{
+  width: 32px;
+  margin-top: -7px;
+}
+.footer li{
+  height: 100%;
+  margin-left: 20px;
+}
+.footer a{
+  color: #000;
+}
+.footer a.api{
+  color: rgb(158,231,214);
+}
+</style>
+
+<style>
+/* from http://projects.lukehaas.me/css-loaders/ */
+.loader {
+  margin: 60px auto;
+  font-size: 10px;
+  position: relative;
+  text-indent: -9999em;
+  border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-left: 1.1em solid rgb(197,166,223);
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+}
+.loader, .loader:after {
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+}
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
 }
 </style>
 
@@ -171,7 +255,7 @@ form{
     </ul>
     <ul class="list-inline menu">
       <li class="ou">
-        <a href="#">Où ?</a>
+        <a href="#" onclick='window.alert("bientot !")'>Où ?</a>
       </li><li class="quand active">
         <a href="index.html">Quand ?</a>
       </li>
@@ -299,12 +383,33 @@ form{
 
     <div class="col-md-8 results-wrapper">
       <div id="results">
-
+        <div id='results-placeholder'></div>
+        <div class="loader hide">Calculage ...</div>
+        <div class='row more-row result-row hide' id="more">
+          <div class="col-xs-12">j'en veux encore plus !</div>
+        </div>
       </div>
     </div>
   </div>
-
 </div>
+
+<footer class="footer">
+  <div class="container">
+    <ul class="list-inline pull-right">
+      <li>
+        <a href="https://github.com/adipasquale/sncf-lol-api" class='api'>
+          api docs
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/adipasquale/sncf-lol-www">
+          <img src="images/GitHub-Mark-64px.png" alt="github">
+          fork me !
+        </a>
+      </li>
+    </ul>
+  </div>
+</footer>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
@@ -342,6 +447,8 @@ form{
     var rowTemplate = _.template($("#results-row-template").html());
 
     var currData = {};
+    var currOffset = 0;
+    var runningRequests = 0;
     window.currData = currData;
 
     var renderItems = function(items){
@@ -357,7 +464,7 @@ form{
         }
       });
       weeks = _.sortBy(weeks, function(w){ return w["best_pair"]["number"] });
-      $("#results").html(
+      $("#results-placeholder").html(
         _.map(weeks, function(week){
           return rowTemplate({week: week, best_pair: week["best_pair"]})
         }).join("")
@@ -377,6 +484,7 @@ form{
     }
 
     var callApi = function(departureCity, arrivalCity, date, departureHour, direction, weekOffset){
+      runningRequests += 1;
       $.ajax({
         url: apiUrl,
         method: "POST",
@@ -418,11 +526,16 @@ form{
           }
         },
         error: function(err){
-          $("#results").html("erreur :(");
+          $("#results-placeholder").html("erreur :(");
           console.log(err);
         },
         complete: function(){
-          $submitButton.removeAttr("disabled");
+          runningRequests -= 1;
+          if (runningRequests == 0) {
+            $submitButton.removeAttr("disabled");
+            $(".loader").addClass("hide");
+            $("#more").removeClass("hide");
+          }
         }
       });
     }
@@ -430,22 +543,38 @@ form{
     $("#search-form").submit(function(){
       $submitButton = $("#search-form *[type=submit]");
       $submitButton.attr("disabled", "disabled");
-      $("#results").html("Crawling voyages-sncf ...");
+      $(".loader").removeClass("hide");
+      $("#more").addClass("hide");
       currData = {};
+      currOffset = 0;
+      loadMoreResults();
+      return false;
+    });
 
+    $("#more").click(function(e){
+      e.preventDefault();
+      $(".loader").removeClass("hide");
+      $("#more").addClass("hide");
+      loadMoreResults();
+      return false;
+    });
+
+    var loadMoreResults = function() {
       var departureCity = $("#departure_city").val();
       var arrivalCity = $("#arrival_city").val();
       var nextFriday = getNextDay(new Date(), 5);
-      for(var i = 0; i < 10; i++) {
+      runningRequests = 0;
+      for(var i = 0; i < 4; i++) {
         friday = new Date(nextFriday.getTime());
-        friday.setDate(friday.getDate() + i * 7);
+        friday.setDate(friday.getDate() + (currOffset * 7));
         var sunday = getNextDay(friday, 0);
-        callApi(departureCity, arrivalCity, friday, $("#inwards_departure_hour").val(), "inwards", i + 1);
-        callApi(arrivalCity, departureCity, sunday, $("#backwards_departure_hour").val(), "backwards", i + 1);
+        callApi(departureCity, arrivalCity, friday, $("#inwards_departure_hour").val(), "inwards", currOffset + 1);
+        callApi(arrivalCity, departureCity, sunday, $("#backwards_departure_hour").val(), "backwards", currOffset + 1);
+        currOffset += 1;
       }
+    };
 
-      return false;
-    })
+
   })
 </script>
 
